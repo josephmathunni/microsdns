@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MICROS DNS — Engineering Reliable Digital Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-deep: #08111F;
+    --bg-slate: #101828;
+    --accent: #2F80FF;
+    --highlight: #4FD1FF;
+    --text: #FFFFFF;
+    --text-secondary: #CBD5E1;
+    --glass-bg: rgba(255,255,255,0.04);
+    --glass-border: rgba(255,255,255,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-deep); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+  /* ── NAVIGATION ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.4s ease;
+  }
+  nav.scrolled {
+    background: rgba(8,17,31,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 14px 48px;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .nav-logo-mark {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--highlight));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  .nav-logo-text {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .nav-logo-text span { color: var(--highlight); }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent);
+    color: white !important;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600 !important;
+    transition: all 0.2s !important;
+  }
+  .nav-cta:hover {
+    background: var(--highlight) !important;
+    color: var(--bg-deep) !important;
+    box-shadow: 0 0 20px rgba(79,209,255,0.35);
+  }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-gradient {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(47,128,255,0.08) 0%, transparent 65%),
+                radial-gradient(ellipse 40% 40% at 20% 20%, rgba(79,209,255,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 2; }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(47,128,255,0.12);
+    border: 1px solid rgba(47,128,255,0.25);
+    border-radius: 100px;
+    padding: 6px 14px 6px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--highlight);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .hero-eyebrow-dot {
+    width: 6px; height: 6px;
+    background: var(--highlight);
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+  .hero-heading {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: clamp(44px, 5.5vw, 72px);
+    line-height: 1.08;
+    letter-spacing: -2px;
+    margin-bottom: 28px;
+  }
+  .hero-heading .line-accent {
+    background: linear-gradient(90deg, var(--accent), var(--highlight));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 44px;
+  }
+  .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #1a6ee8);
+    color: white;
+    padding: 15px 32px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s;
+    box-shadow: 0 4px 24px rgba(47,128,255,0.3);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(47,128,255,0.45);
+  }
+  .btn-secondary {
+    color: var(--text);
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--glass-border);
+    transition: all 0.25s;
+  }
+  .btn-secondary:hover {
+    border-color: rgba(255,255,255,0.2);
+    background: var(--glass-bg);
+    transform: translateY(-2px);
+  }
+  .hero-visual {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 520px;
+  }
+  #network-canvas {
+    width: 100%;
+    height: 100%;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 56px;
+    padding-top: 40px;
+    border-top: 1px solid var(--glass-border);
+  }
+  .stat-item {}
+  .stat-num {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -1px;
+    color: var(--text);
+  }
+  .stat-num span { color: var(--highlight); }
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 100px 48px; }
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 4vw, 52px);
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .section-body {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    max-width: 620px;
+  }
+  .container { max-width: 1280px; margin: 0 auto; }
+
+  /* ── ABOUT ── */
+  #about { background: var(--bg-slate); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 60px;
+  }
+  .about-visual {
+    position: relative;
+    height: 340px;
+  }
+  .about-card-float {
+    position: absolute;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .about-card-float.card-1 { top: 20px; left: 0; }
+  .about-card-float.card-2 { top: 130px; right: 0; }
+  .about-card-float.card-3 { bottom: 20px; left: 40px; }
+  .float-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .float-icon.blue { background: rgba(47,128,255,0.15); }
+  .float-icon.cyan { background: rgba(79,209,255,0.12); }
+  .float-icon.purple { background: rgba(139,92,246,0.15); }
+  .float-text strong { display: block; font-size: 14px; font-weight: 600; }
+  .float-text span { font-size: 12px; color: var(--text-secondary); }
+  .about-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .pill {
+    background: rgba(47,128,255,0.1);
+    border: 1px solid rgba(47,128,255,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--highlight);
+  }
+
+  /* ── SERVICES ── */
+  #services { background: var(--bg-deep); }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+  .service-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 36px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--highlight));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .service-card:hover { transform: translateY(-6px); border-color: rgba(47,128,255,0.25); background: rgba(47,128,255,0.05); }
+  .service-card:hover::before { opacity: 1; }
+  .service-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: rgba(47,128,255,0.12);
+    border: 1px solid rgba(47,128,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+  }
+  .service-icon svg { width: 26px; height: 26px; }
+  .service-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 14px;
+    letter-spacing: -0.3px;
+  }
+  .service-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .service-list li {
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .service-list li::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── WHY CHOOSE ── */
+  #why { background: var(--bg-slate); }
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+  .why-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .why-card:hover { transform: translateY(-5px); border-color: rgba(47,128,255,0.3); }
+  .why-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(47,128,255,0.15), rgba(79,209,255,0.1));
+    border: 1px solid rgba(47,128,255,0.2);
+  }
+  .why-icon svg { width: 26px; height: 26px; }
+  .why-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 10px;
+    letter-spacing: -0.2px;
+  }
+  .why-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* ── TECH STACK ── */
+  #technologies { background: var(--bg-deep); }
+  .tech-category { margin-top: 60px; }
+  .tech-category + .tech-category { margin-top: 40px; }
+  .tech-cat-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .tech-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .tech-pill {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .tech-pill:hover {
+    background: rgba(47,128,255,0.08);
+    border-color: rgba(47,128,255,0.25);
+    color: var(--text);
+    transform: translateY(-2px);
+  }
+  .tech-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── PROCESS ── */
+  #process { background: var(--bg-slate); }
+  .process-timeline {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    margin-top: 70px;
+    position: relative;
+  }
+  .process-timeline::before {
+    content: '';
+    position: absolute;
+    top: 32px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--highlight), var(--accent), transparent);
+    opacity: 0.35;
+  }
+  .process-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 16px;
+    position: relative;
+  }
+  .process-num {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--bg-deep);
+    border: 2px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s;
+  }
+  .process-step:hover .process-num {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(47,128,255,0.08);
+    box-shadow: 0 0 20px rgba(47,128,255,0.2);
+  }
+  .process-step-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 10px;
+    letter-spacing: -0.2px;
+  }
+  .process-step-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* ── CTA ── */
+  #cta {
+    background: var(--bg-deep);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  .cta-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(47,128,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-inner { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+  .cta-heading {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 4.5vw, 54px);
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .cta-sub {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg-slate);
+    border-top: 1px solid var(--glass-border);
+    padding: 64px 48px 40px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 60px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .footer-brand-name {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+  .footer-tagline {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+  .footer-services {
+    font-size: 12px;
+    color: rgba(203,213,225,0.5);
+    line-height: 1.7;
+  }
+  .footer-col-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .footer-links a {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text); }
+  .footer-socials {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .social-btn {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .social-btn:hover {
+    background: rgba(47,128,255,0.15);
+    border-color: rgba(47,128,255,0.3);
+    transform: translateY(-2px);
+  }
+  .social-btn svg { width: 17px; height: 17px; }
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 32px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .footer-copyright { font-size: 13px; color: rgba(203,213,225,0.45); }
+
+  /* ── REVEAL ANIMATION ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    width: 48px; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--highlight));
+    border-radius: 2px;
+    margin-bottom: 28px;
+  }
+
+  /* ── MOBILE HAMBURGER ── */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .nav-toggle span {
+    display: block;
+    width: 22px; height: 2px;
+    background: var(--text-secondary);
+    border-radius: 1px;
+    transition: all 0.3s;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    nav { padding: 18px 32px; }
+    nav.scrolled { padding: 12px 32px; }
+    #hero { grid-template-columns: 1fr; padding: 120px 32px 80px; gap: 60px; }
+    .hero-visual { height: 340px; }
+    section { padding: 80px 32px; }
+    .services-grid { grid-template-columns: 1fr; }
+    .why-grid { grid-template-columns: repeat(2, 1fr); }
+    .process-timeline { grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .process-timeline::before { display: none; }
+    .about-grid { grid-template-columns: 1fr; }
+    .about-visual { display: none; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    nav.scrolled { padding: 12px 20px; }
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    #hero { padding: 100px 20px 60px; }
+    .hero-stats { gap: 24px; flex-wrap: wrap; }
+    section { padding: 64px 20px; }
+    .why-grid { grid-template-columns: 1fr; }
+    .process-timeline { grid-template-columns: 1fr 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 36px; }
+    footer { padding: 48px 20px 32px; }
+    .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+    .services-grid { gap: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAVIGATION ── -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <div class="nav-logo-mark">MD</div>
+    <span class="nav-logo-text">MICROS <span>DNS</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#technologies">Technologies</a></li>
+    <li><a href="#process">Approach</a></li>
+    <li><a href="#cta" class="nav-cta">Contact</a></li>
+  </ul>
+  <div class="nav-toggle" onclick="toggleNav()" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-bg-gradient"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-dot"></div>
+      Micros Digital Network & Software Services
+    </div>
+    <h1 class="hero-heading">
+      Engineering<br>
+      <span class="line-accent">Reliable Digital</span><br>
+      Solutions
+    </h1>
+    <p class="hero-sub">
+      MICROS DNS partners with businesses to design, build, and support modern software systems, enterprise networks, and scalable cloud infrastructure that enable long-term business growth.
+    </p>
+    <div class="hero-actions">
+      <a href="#cta" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        Let's Talk
+      </a>
+      <a href="#services" class="btn-secondary">
+        Explore Services
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">50<span>+</span></div>
+        <div class="stat-label">Projects Delivered</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">30<span>+</span></div>
+        <div class="stat-label">Enterprise Clients</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">99<span>%</span></div>
+        <div class="stat-label">Uptime Guarantee</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <svg id="network-canvas" viewBox="0 0 560 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="glow-center" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#2F80FF" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#2F80FF" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="glow-filter">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-strong">
+          <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(47,128,255,0.4)"/>
+        </marker>
+      </defs>
+
+      <!-- Background glow -->
+      <ellipse cx="280" cy="260" rx="200" ry="180" fill="url(#glow-center)"/>
+
+      <!-- Network edges / connections -->
+      <g stroke="rgba(47,128,255,0.2)" stroke-width="1" fill="none">
+        <line x1="280" y1="130" x2="140" y2="220"/>
+        <line x1="280" y1="130" x2="420" y2="200"/>
+        <line x1="280" y1="130" x2="280" y2="300"/>
+        <line x1="140" y1="220" x2="80" y2="340"/>
+        <line x1="140" y1="220" x2="240" y2="380"/>
+        <line x1="420" y1="200" x2="480" y2="320"/>
+        <line x1="420" y1="200" x2="340" y2="370"/>
+        <line x1="280" y1="300" x2="160" y2="420"/>
+        <line x1="280" y1="300" x2="400" y2="420"/>
+        <line x1="80" y1="340" x2="160" y2="420"/>
+        <line x1="480" y1="320" x2="400" y2="420"/>
+        <line x1="140" y1="220" x2="280" y2="300"/>
+        <line x1="420" y1="200" x2="280" y2="300"/>
+        <line x1="80" y1="340" x2="240" y2="380"/>
+        <line x1="480" y1="320" x2="340" y2="370"/>
+        <line x1="240" y1="380" x2="340" y2="370"/>
+        <!-- outer fringe -->
+        <line x1="180" y1="80" x2="280" y2="130"/>
+        <line x1="380" y1="80" x2="280" y2="130"/>
+        <line x1="180" y1="80" x2="140" y2="220"/>
+        <line x1="380" y1="80" x2="420" y2="200"/>
+        <line x1="520" y1="200" x2="420" y2="200"/>
+        <line x1="40" y1="240" x2="140" y2="220"/>
+      </g>
+
+      <!-- Animated data flow pulses -->
+      <g fill="none" stroke="rgba(79,209,255,0.6)" stroke-width="1.5" stroke-linecap="round">
+        <line x1="280" y1="130" x2="280" y2="300">
+          <animate attributeName="stroke-dashoffset" from="0" to="-170" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-dasharray" values="0,170;20,150;0,170" dur="2s" repeatCount="indefinite"/>
+        </line>
+        <line x1="140" y1="220" x2="480" y2="320">
+          <animate attributeName="stroke-dashoffset" from="0" to="-360" dur="2.7s" repeatCount="indefinite" begin="0.5s"/>
+          <animate attributeName="stroke-dasharray" values="0,360;25,335;0,360" dur="2.7s" repeatCount="indefinite" begin="0.5s"/>
+        </line>
+        <line x1="420" y1="200" x2="80" y2="340">
+          <animate attributeName="stroke-dashoffset" from="0" to="-380" dur="3.2s" repeatCount="indefinite" begin="1s"/>
+          <animate attributeName="stroke-dasharray" values="0,380;20,360;0,380" dur="3.2s" repeatCount="indefinite" begin="1s"/>
+        </line>
+      </g>
+
+      <!-- Node: Center main -->
+      <g filter="url(#glow-strong)">
+        <circle cx="280" cy="130" r="18" fill="rgba(47,128,255,0.15)" stroke="#2F80FF" stroke-width="1.5"/>
+        <circle cx="280" cy="130" r="8" fill="#2F80FF"/>
+        <circle cx="280" cy="130" r="8" fill="#2F80FF">
+          <animate attributeName="r" values="8;14;8" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- Large secondary nodes -->
+      <g filter="url(#glow-filter)">
+        <circle cx="140" cy="220" r="13" fill="rgba(47,128,255,0.12)" stroke="#2F80FF" stroke-width="1.5"/>
+        <circle cx="140" cy="220" r="6" fill="#2F80FF"/>
+
+        <circle cx="420" cy="200" r="13" fill="rgba(47,128,255,0.12)" stroke="#4FD1FF" stroke-width="1.5"/>
+        <circle cx="420" cy="200" r="6" fill="#4FD1FF"/>
+
+        <circle cx="280" cy="300" r="13" fill="rgba(47,128,255,0.12)" stroke="#2F80FF" stroke-width="1.5"/>
+        <circle cx="280" cy="300" r="6" fill="#2F80FF"/>
+      </g>
+
+      <!-- Outer nodes -->
+      <g fill="rgba(47,128,255,0.8)" stroke="rgba(47,128,255,0.3)" stroke-width="1">
+        <circle cx="80" cy="340" r="8"/>
+        <circle cx="480" cy="320" r="8"/>
+        <circle cx="160" cy="420" r="8"/>
+        <circle cx="400" cy="420" r="8"/>
+        <circle cx="240" cy="380" r="6"/>
+        <circle cx="340" cy="370" r="6"/>
+        <circle cx="180" cy="80" r="7"/>
+        <circle cx="380" cy="80" r="7"/>
+        <circle cx="520" cy="200" r="6" fill="rgba(79,209,255,0.8)" stroke="rgba(79,209,255,0.3)"/>
+        <circle cx="40" cy="240" r="6" fill="rgba(79,209,255,0.8)" stroke="rgba(79,209,255,0.3)"/>
+      </g>
+
+      <!-- Labels -->
+      <g font-family="Inter, sans-serif" font-size="11" fill="rgba(203,213,225,0.7)">
+        <text x="295" y="122" font-weight="600" fill="rgba(79,209,255,0.9)">Core</text>
+        <text x="102" y="215" font-weight="500">Network</text>
+        <text x="430" y="195" font-weight="500">Cloud</text>
+        <text x="292" y="296" font-weight="500">API</text>
+        <text x="50" y="360">Edge</text>
+        <text x="484" y="338">CDN</text>
+        <text x="120" y="445">Data</text>
+        <text x="405" y="445">Cache</text>
+        <text x="148" y="76">Auth</text>
+        <text x="385" y="76">DNS</text>
+      </g>
+
+      <!-- Floating micro-particles -->
+      <g fill="rgba(79,209,255,0.5)">
+        <circle cx="360" cy="150" r="2"><animate attributeName="cy" values="150;130;150" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite"/></circle>
+        <circle cx="200" cy="270" r="1.5"><animate attributeName="cx" values="200;215;200" dur="5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0.9;0.4" dur="5s" repeatCount="indefinite"/></circle>
+        <circle cx="460" cy="270" r="2"><animate attributeName="cy" values="270;255;270" dur="3.5s" repeatCount="indefinite" begin="1s"/></circle>
+        <circle cx="320" cy="440" r="1.5"><animate attributeName="cx" values="320;308;320" dur="4.5s" repeatCount="indefinite" begin="0.7s"/></circle>
+        <circle cx="120" cy="160" r="2"><animate attributeName="cy" values="160;148;160" dur="6s" repeatCount="indefinite" begin="2s"/><animate attributeName="opacity" values="0.3;0.8;0.3" dur="6s" repeatCount="indefinite" begin="2s"/></circle>
+        <circle cx="490" cy="400" r="1.5"><animate attributeName="cy" values="400;415;400" dur="5.5s" repeatCount="indefinite" begin="1.5s"/></circle>
+      </g>
+
+      <!-- Corner decoration rings -->
+      <circle cx="280" cy="130" r="30" fill="none" stroke="rgba(47,128,255,0.08)" stroke-width="1">
+        <animate attributeName="r" values="30;45;30" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0;0.5" dur="4s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section id="about">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">About Us</div>
+      <div class="section-divider"></div>
+    </div>
+    <div class="about-grid">
+      <div>
+        <h2 class="section-title reveal reveal-delay-1">Who We Are</h2>
+        <p class="section-body reveal reveal-delay-2">
+          MICROS DNS is a technology consulting company focused on delivering reliable software engineering, enterprise networking, cloud infrastructure, and IT consulting services.
+        </p>
+        <p class="section-body reveal reveal-delay-2" style="margin-top:18px">
+          We help organizations modernize their technology platforms with scalable, secure, and efficient solutions designed for long-term success. From initial architecture through ongoing operations, we remain a committed partner at every stage.
+        </p>
+        <div class="about-pills reveal reveal-delay-3">
+          <span class="pill">Software Engineering</span>
+          <span class="pill">Enterprise Networks</span>
+          <span class="pill">Cloud Infrastructure</span>
+          <span class="pill">IT Consulting</span>
+          <span class="pill">Security First</span>
+        </div>
+      </div>
+      <div class="about-visual reveal reveal-delay-2">
+        <div class="about-card-float card-1">
+          <div class="float-icon blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2F80FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </div>
+          <div class="float-text"><strong>Enterprise Grade</strong><span>Production-ready systems</span></div>
+        </div>
+        <div class="about-card-float card-2">
+          <div class="float-icon cyan">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FD1FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          </div>
+          <div class="float-text"><strong>99.9% Uptime</strong><span>Reliable infrastructure</span></div>
+        </div>
+        <div class="about-card-float card-3">
+          <div class="float-icon purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <div class="float-text"><strong>Security First</strong><span>Built-in best practices</span></div>
+        </div>
+        <!-- background decorative element -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.07" viewBox="0 0 400 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="60" y="60" width="280" height="220" rx="20" stroke="#2F80FF" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <rect x="90" y="90" width="220" height="160" rx="12" stroke="#4FD1FF" stroke-width="1" stroke-dasharray="4 6"/>
+          <circle cx="200" cy="170" r="60" stroke="#2F80FF" stroke-width="1"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SERVICES ── -->
+<section id="services">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">What We Do</div>
+      <div class="section-divider"></div>
+    </div>
+    <h2 class="section-title reveal reveal-delay-1">Our Core Services</h2>
+    <p class="section-body reveal reveal-delay-2">Comprehensive technology solutions spanning software, infrastructure, cloud, and strategy — all under one trusted partnership.</p>
+
+    <div class="services-grid">
+
+      <!-- Software Engineering -->
+      <div class="service-card reveal reveal-delay-1">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2F80FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        </div>
+        <div class="service-title">Software Engineering</div>
+        <ul class="service-list">
+          <li>Custom Software Development</li>
+          <li>Enterprise Applications</li>
+          <li>SaaS Platforms</li>
+          <li>API Development</li>
+          <li>System Integration</li>
+        </ul>
+      </div>
+
+      <!-- Network Infrastructure -->
+      <div class="service-card reveal reveal-delay-2">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4FD1FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="8" x2="12" y2="11"></line><line x1="7" y1="14" x2="12" y2="11"></line><line x1="17" y1="14" x2="12" y2="11"></line><circle cx="7" cy="17" r="3"></circle><circle cx="17" cy="17" r="3"></circle></svg>
+        </div>
+        <div class="service-icon" style="background:rgba(79,209,255,0.1);border-color:rgba(79,209,255,0.2);display:none"></div>
+        <div class="service-title">Network Infrastructure</div>
+        <ul class="service-list">
+          <li>Enterprise Networking</li>
+          <li>LAN/WAN Design</li>
+          <li>Infrastructure Planning</li>
+          <li>Network Optimization</li>
+          <li>Secure Connectivity</li>
+        </ul>
+      </div>
+
+      <!-- Cloud Services -->
+      <div class="service-card reveal reveal-delay-3">
+        <div class="service-icon" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+        </div>
+        <div class="service-title">Cloud Services</div>
+        <ul class="service-list">
+          <li>AWS & Microsoft Azure</li>
+          <li>Cloud Migration</li>
+          <li>Infrastructure Modernization</li>
+          <li>Backup & Disaster Recovery</li>
+          <li>Cost Optimization</li>
+        </ul>
+      </div>
+
+      <!-- IT Consulting -->
+      <div class="service-card reveal reveal-delay-4">
+        <div class="service-icon" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="service-title">IT Consulting</div>
+        <ul class="service-list">
+          <li>Technology Strategy</li>
+          <li>Solution Architecture</li>
+          <li>Infrastructure Assessment</li>
+          <li>Digital Transformation</li>
+          <li>Performance Optimization</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── WHY CHOOSE ── -->
+<section id="why">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Why MICROS DNS</div>
+      <div class="section-divider"></div>
+    </div>
+    <h2 class="section-title reveal reveal-delay-1">Built on Trust.<br>Delivered with Precision.</h2>
+    <div class="why-grid" style="margin-top:60px">
+
+      <div class="why-card reveal reveal-delay-1">
+        <div class="why-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2F80FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div class="why-title">Reliable Engineering</div>
+        <div class="why-text">Building dependable technology solutions with long-term stability and production-grade confidence.</div>
+      </div>
+
+      <div class="why-card reveal reveal-delay-2">
+        <div class="why-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4FD1FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+        </div>
+        <div class="why-title">Enterprise Focus</div>
+        <div class="why-text">Solutions designed for organizational growth, scalability, and the demands of enterprise environments.</div>
+      </div>
+
+      <div class="why-card reveal reveal-delay-3">
+        <div class="why-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <div class="why-title">Security First</div>
+        <div class="why-text">Every solution we deliver follows rigorous security principles and industry best practices from day one.</div>
+      </div>
+
+      <div class="why-card reveal reveal-delay-4">
+        <div class="why-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="why-title">Trusted Partnership</div>
+        <div class="why-text">Supporting clients from initial planning through long-term operations — a relationship, not just a project.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── TECHNOLOGIES ── -->
+<section id="technologies">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Technology Stack</div>
+      <div class="section-divider"></div>
+    </div>
+    <h2 class="section-title reveal reveal-delay-1">Tools We Master</h2>
+    <p class="section-body reveal reveal-delay-2">We work with the most reliable and modern technology stacks to ensure every solution is built to last.</p>
+
+    <div class="tech-category reveal reveal-delay-2">
+      <div class="tech-cat-title">Software Development</div>
+      <div class="tech-pills">
+        <span class="tech-pill"><span class="tech-dot" style="background:#6366f1"></span>PHP</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#3b82f6"></span>Python</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#ef4444"></span>Laravel</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#10b981"></span>FastAPI</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#f59e0b"></span>JavaScript</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#4FD1FF"></span>React</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#84cc16"></span>Node.js</span>
+      </div>
+    </div>
+
+    <div class="tech-category reveal reveal-delay-3">
+      <div class="tech-cat-title">Infrastructure & DevOps</div>
+      <div class="tech-pills">
+        <span class="tech-pill"><span class="tech-dot" style="background:#f97316"></span>Linux</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#0078d4"></span>Windows Server</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#2496ed"></span>Docker</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#326ce5"></span>Kubernetes</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#009639"></span>NGINX</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#ff9900"></span>AWS</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#00f7ff"></span>Azure</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#036eac"></span>Google Cloud</span>
+
+      </div>
+    </div>
+
+    <div class="tech-category reveal reveal-delay-3">
+      <div class="tech-cat-title">Networking</div>
+      <div class="tech-pills">
+        <span class="tech-pill"><span class="tech-dot" style="background:#1ba0d7"></span>Cisco</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#cf1726"></span>Fortinet</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#0559b3"></span>Arista Networks</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#6366f1"></span>VPN</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#ef4444"></span>Firewall</span>
+      </div>
+    </div>
+
+    <div class="tech-category reveal reveal-delay-4">
+      <div class="tech-cat-title">Databases</div>
+      <div class="tech-pills">
+        <span class="tech-pill"><span class="tech-dot" style="background:#4479a1"></span>MySQL/MariaDB</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#336791"></span>PostgreSQL</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#dc382d"></span>Redis</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#cc2927"></span>Microsoft SQL Server</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#ec7c7a"></span>Oracle Database</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#ff9900"></span>Amazon DynamoDB</span>
+        
+      </div>
+    </div>
+
+    <div class="tech-category reveal reveal-delay-4">
+      <div class="tech-cat-title">Development Tools</div>
+      <div class="tech-pills">
+        <span class="tech-pill"><span class="tech-dot" style="background:#f05032"></span>Git</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#181717"></span>PyCharm</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#007acc"></span>Visual Studio</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#149458"></span>Android Studio</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#ffffff"></span>Xcode</span>
+        <span class="tech-pill"><span class="tech-dot" style="background:#00f7ff"></span>Flutter</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROCESS ── -->
+<section id="process">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Our Approach</div>
+      <div class="section-divider"></div>
+    </div>
+    <h2 class="section-title reveal reveal-delay-1">How We Work</h2>
+    <p class="section-body reveal reveal-delay-2">A structured, transparent process that keeps every project on track — from first discovery to long-term support.</p>
+
+    <div class="process-timeline">
+      <div class="process-step reveal reveal-delay-1">
+        <div class="process-num">01</div>
+        <div class="process-step-title">Discover</div>
+        <div class="process-step-text">We start by deeply understanding your business goals, constraints, and vision for the future.</div>
+      </div>
+      <div class="process-step reveal reveal-delay-2">
+        <div class="process-num">02</div>
+        <div class="process-step-title">Plan</div>
+        <div class="process-step-text">We design the architecture, technology choices, and a clear roadmap with defined milestones.</div>
+      </div>
+      <div class="process-step reveal reveal-delay-3">
+        <div class="process-num">03</div>
+        <div class="process-step-title">Develop</div>
+        <div class="process-step-text">Our team builds your software and infrastructure with precision, quality, and transparency throughout.</div>
+      </div>
+      <div class="process-step reveal reveal-delay-4">
+        <div class="process-num">04</div>
+        <div class="process-step-title">Deploy</div>
+        <div class="process-step-text">We implement, test, and optimize everything — ensuring a smooth launch that meets every requirement.</div>
+      </div>
+      <div class="process-step reveal reveal-delay-4" style="transition-delay:0.5s">
+        <div class="process-num">05</div>
+        <div class="process-step-title">Support</div>
+        <div class="process-step-text">Continuous improvement, monitoring, and ongoing maintenance keep your systems running at peak performance.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section id="cta">
+  <div class="cta-bg"></div>
+  <div class="cta-inner">
+    <div class="reveal">
+      <div class="section-label" style="text-align:center;display:block;margin:0 auto 16px">Get In Touch</div>
+    </div>
+    <h2 class="cta-heading reveal reveal-delay-1">Let's Build Something<br><span style="background:linear-gradient(90deg,var(--accent),var(--highlight));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Reliable Together</span></h2>
+    <p class="cta-sub reveal reveal-delay-2">Whether you need software development, enterprise networking, or cloud consulting, MICROS DNS is ready to help your business grow with confidence.</p>
+    <div class="reveal reveal-delay-3">
+      <a href="mailto:hello@microsdns.com" class="btn-primary" style="display:inline-flex;font-size:16px;padding:18px 40px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        Contact Us
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="nav-logo" style="margin-bottom:16px;display:inline-flex">
+        <div class="nav-logo-mark">MD</div>
+        <span class="nav-logo-text" style="margin-left:10px">MICROS <span>DNS</span></span>
+      </div>
+      <div class="footer-tagline">Engineering Reliable Digital Solutions</div>
+      <div class="footer-services">Software Development • Network Infrastructure<br>Cloud Solutions • IT Consulting</div>
+      <div class="footer-socials">
+        <a href="#" class="social-btn" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+        </a>
+        <a href="#" class="social-btn" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+        </a>
+        <a href="mailto:hello@microsdns.com" class="social-btn" aria-label="Email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <div class="footer-col-title">Navigation</div>
+      <ul class="footer-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#technologies">Technologies</a></li>
+        <li><a href="#process">Our Approach</a></li>
+        <li><a href="#cta">Contact</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="footer-col-title">Services</div>
+      <ul class="footer-links">
+        <li><a href="#services">Software Engineering</a></li>
+        <li><a href="#services">Network Infrastructure</a></li>
+        <li><a href="#services">Cloud Services</a></li>
+        <li><a href="#services">IT Consulting</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span class="footer-copyright">© 2025 MICROS DNS. All rights reserved.</span>
+    <span class="footer-copyright">Engineering Reliable Digital Solutions</span>
+  </div>
+</footer>
+
+<script>
+  // ── NAVBAR SCROLL ──
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // ── SCROLL REVEAL ──
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // ── MOBILE NAV ──
+  function toggleNav() {
+    const links = document.querySelector('.nav-links');
+    const isOpen = links.style.display === 'flex';
+    links.style.display = isOpen ? 'none' : 'flex';
+    links.style.flexDirection = 'column';
+    links.style.position = 'absolute';
+    links.style.top = '70px';
+    links.style.left = '0';
+    links.style.right = '0';
+    links.style.background = 'rgba(8,17,31,0.97)';
+    links.style.padding = '20px 24px';
+    links.style.borderBottom = '1px solid rgba(255,255,255,0.08)';
+    links.style.gap = '20px';
+    if (isOpen) links.style.display = 'none';
+  }
+
+  // ── SMOOTH CLOSE MOBILE NAV on link click ──
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      const links = document.querySelector('.nav-links');
+      if (window.innerWidth <= 768) links.style.display = 'none';
+    });
+  });
+
+  // ── HERO FADE IN ──
+  document.querySelector('.hero-content').style.opacity = '0';
+  document.querySelector('.hero-content').style.transform = 'translateY(20px)';
+  setTimeout(() => {
+    const hc = document.querySelector('.hero-content');
+    hc.style.transition = 'opacity 0.9s ease, transform 0.9s ease';
+    hc.style.opacity = '1';
+    hc.style.transform = 'translateY(0)';
+  }, 100);
+
+  document.querySelector('.hero-visual').style.opacity = '0';
+  setTimeout(() => {
+    const hv = document.querySelector('.hero-visual');
+    hv.style.transition = 'opacity 1.2s ease';
+    hv.style.opacity = '1';
+  }, 300);
+</script>
+</body>
+</html>
